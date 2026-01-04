@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
 import { useLanguage } from '@/contexts/language-context';
-import { useLanguage } from '@/contexts/language-context';
 
 interface MainLayoutProps {
     children: React.ReactNode;

@@ -4,13 +4,232 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 type Language = 'en' | 'es';
 
+interface TranslationKeys {
+    // Titles
+    changePassTitle: string;
+    settingsTitle: string;
+    usersTitle: string;
+    greetingsTitle: string;
+    expensesTitle: string;
+    buyingListTitle: string;
+    familyExpensesTitle: string;
+    themeSelectionTitle: string;
+    totalExpensesTitle: string;
+    top5ThisMonthTitle: string;
+    totalDebtTitle: string;
+    totalThisMonthTitle: string;
+    expensesForTitle: string;
+    analyticsTitle: string;
+    closingMonthTitle: string;
+
+    // Themes
+    'theme.Mountains': string;
+    'theme.Terra': string;
+    'theme.Ocean': string;
+    'theme.Forest': string;
+    'theme.Nature': string;
+    'theme.Country': string;
+    'theme.Flowers': string;
+    'theme.GreenRiver': string;
+    'theme.SunnyDay': string;
+    'theme.Surf': string;
+    'theme.Sunset': string;
+    'theme.Greek': string;
+    'theme.BrightSea': string;
+    'theme.FreshSalad': string;
+    'theme.ChichoFrozen': string;
+
+    // Grid Headers
+    gridFirstName: string;
+    gridLastName: string;
+    gridRole: string;
+    gridEmail: string;
+    gridGroup: string;
+    gridBlocked: string;
+    gridLastLogin: string;
+    gridCreatedDate: string;
+
+    // Buttons
+    btnNewExpense: string;
+    btnMyExpenses: string;
+    btnExpenseHistory: string;
+    btnCloseMonth: string;
+    btnCancel: string;
+    btnLogout: string;
+    btnRefresh: string;
+    btnLoad: string;
+    btnActive: string;
+    settingsMenuChangePassBtn: string;
+    settingsMenuUserLogsBtn: string;
+    settingsMenuAuditLogsBtn: string;
+    settingsMenuImportLogsBtn: string;
+    settingsMenuSyncDataBtn: string;
+    settingsMenuUserBtn: string;
+    settingsMenuLanguageBtn: string;
+    settingsMenuDarkModeBtn: string;
+    settingsMenuLightModeBtn: string;
+    btnAddRemoveFromList: string;
+    btnLogin: string;
+    btnSaveExpense: string;
+    btnSaveExpenses: string;
+    btnTheme: string;
+    btnSelectedMonth: string;
+    btnMonthSummary: string;
+    btnPayAndCloseMonth: string;
+    btnNewUser: string;
+    btnEditUser: string;
+    btnNewGroup: string;
+
+    // Tooltips
+    tooltipLogout: string;
+    toltipSettings: string;
+    goBackToolTip: string;
+    homePageToolTip: string;
+    addNewUserToolTip: string;
+    addNewGroupToolTip: string;
+    refreshUsersListToolTip: string;
+    commentsToolTip: string;
+    refreshToolTip: string;
+
+    // Placeholders
+    phConfirmNewPass: string;
+    phCurrentPass: string;
+    phEmail: string;
+    phNewPass: string;
+    phPassword: string;
+    phExpenseDescription: string;
+    phExpenseAmount: string;
+    phExpenseDate: string;
+    phDueDate: string;
+    phAdditionalComments: string;
+    phSearchExpenseDescOrDate: string;
+
+    // Validations
+    valEmail: string;
+    valPass: string;
+
+    // Notifications
+    invalidPassConfirm: string;
+    invalidPassLength: string;
+    newPassIsCurrentPass: string;
+    notifBinSectionRequired: string;
+    notifCheckConnection: string;
+    notifExpiredSession: string;
+    notifInvalidLogin: string;
+    notifNeedLogin: string;
+    notifTokenExpired: string;
+    notifUserOffline: string;
+    notifUpdateError: string;
+    notifcustNameRequired: string;
+    notifvendNameRequired: string;
+    notifitemNameRequired: string;
+
+    // Dialogs
+    diagLogout: string;
+
+    // Labels
+    lbAuthenticating: string;
+    lbLogin: string;
+    lbRouteLoading: string;
+    currentPass: string;
+    newPass: string;
+    newPassConfirm: string;
+    rememberUser: string;
+    lbVersion: string;
+    lbClickEditUser: string;
+    lbNoTop5Item: string;
+    lbChartOthers: string;
+    lbNothingHere: string;
+
+    // Info
+    infoAccCreate: string;
+
+    // Other
+    failed: string;
+    success: string;
+
+    // CustomGrid
+    phSearch: string;
+    btnChooseCol: string;
+    btnDefaultCol: string;
+    btnExport: string;
+    btnShowAllCol: string;
+
+    // Months
+    'month.january': string;
+    'month.february': string;
+    'month.march': string;
+    'month.april': string;
+    'month.may': string;
+    'month.june': string;
+    'month.july': string;
+    'month.august': string;
+    'month.september': string;
+    'month.october': string;
+    'month.november': string;
+    'month.december': string;
+
+    // Additional translations for consistency
+    concept: string;
+    amount: string;
+    date: string;
+    total: string;
+    noExpenses: string;
+    details: string;
+    summary: string;
+    name: string;
+    email: string;
+    groupId: string;
+    preferences: string;
+    theme: string;
+    darkMode: string;
+    lightMode: string;
+    language: string;
+    english: string;
+    spanish: string;
+    loading: string;
+    error: string;
+    cancel: string;
+    save: string;
+    delete: string;
+    edit: string;
+    close: string;
+    remove: string;
+    addAnother: string;
+    saving: string;
+    changing: string;
+    expenseNumber: string;
+
+    // Settings page translations
+    'settings.title': string;
+    'settings.accountInfo': string;
+    'settings.name': string;
+    'settings.email': string;
+    'settings.groupId': string;
+    'settings.changePassword': string;
+    'settings.currentPassword': string;
+    'settings.newPassword': string;
+    'settings.confirmPassword': string;
+    'settings.changePasswordBtn': string;
+    'settings.changing': string;
+    'settings.preferences': string;
+    'settings.theme': string;
+    'settings.darkMode': string;
+    'settings.lightMode': string;
+    'settings.language': string;
+    'settings.english': string;
+    'settings.spanish': string;
+}
+
+type Translations = Record<Language, TranslationKeys>;
+
 interface LanguageContextType {
     language: Language;
     setLanguage: (lang: Language) => void;
-    t: (key: string) => string;
+    t: (key: keyof TranslationKeys, vars?: Record<string, string>) => string;
 }
 
-const translations = {
+const translations: Translations = {
     en: {
         // Titles
         changePassTitle: "Change Password",
@@ -206,6 +425,26 @@ const translations = {
         saving: "Saving...",
         changing: "Changing...",
         expenseNumber: "Expense #{number}",
+
+        // Settings page translations
+        'settings.title': 'Settings',
+        'settings.accountInfo': 'Account Information',
+        'settings.name': 'Name',
+        'settings.email': 'Email',
+        'settings.groupId': 'Group ID',
+        'settings.changePassword': 'Change Password',
+        'settings.currentPassword': 'Current Password',
+        'settings.newPassword': 'New Password',
+        'settings.confirmPassword': 'Confirm New Password',
+        'settings.changePasswordBtn': 'Change Password',
+        'settings.changing': 'Changing...',
+        'settings.preferences': 'Preferences',
+        'settings.theme': 'Theme',
+        'settings.darkMode': 'Dark mode',
+        'settings.lightMode': 'Light mode',
+        'settings.language': 'Language',
+        'settings.english': 'English',
+        'settings.spanish': 'Español',
     },
     es: {
         // Titles
@@ -402,6 +641,26 @@ const translations = {
         saving: "Guardando...",
         changing: "Cambiando...",
         expenseNumber: "Gasto #{number}",
+
+        // Settings page translations
+        'settings.title': 'Configuración',
+        'settings.accountInfo': 'Información de la Cuenta',
+        'settings.name': 'Nombre',
+        'settings.email': 'Email',
+        'settings.groupId': 'ID del Grupo',
+        'settings.changePassword': 'Cambiar Contraseña',
+        'settings.currentPassword': 'Contraseña Actual',
+        'settings.newPassword': 'Nueva Contraseña',
+        'settings.confirmPassword': 'Confirmar Nueva Contraseña',
+        'settings.changePasswordBtn': 'Cambiar Contraseña',
+        'settings.changing': 'Cambiando...',
+        'settings.preferences': 'Preferencias',
+        'settings.theme': 'Tema',
+        'settings.darkMode': 'Modo oscuro',
+        'settings.lightMode': 'Modo claro',
+        'settings.language': 'Idioma',
+        'settings.english': 'English',
+        'settings.spanish': 'Español',
     }
 };
 
@@ -431,7 +690,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         localStorage.setItem('family-expenses-language', lang);
     };
 
-    const t = (key: string, vars?: Record<string, string>): string => {
+    const t = (key: keyof TranslationKeys, vars?: Record<string, string>): string => {
         let translation = translations[language][key] || key;
         
         // Replace variables in translation
