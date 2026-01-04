@@ -72,7 +72,7 @@ export const usersApi = {
         const query = groupid ? `?groupid=${groupid}` : '';
         return apiFetch<User[]>(`/api/users${query}`);
     },
-    create: (user: Partial<User>) =>
+    create: (user: CreateUserRequest) =>
         apiFetch<User>('/api/users', {
             method: 'POST',
             body: JSON.stringify(user),
@@ -149,6 +149,15 @@ export interface User {
     isblocked: boolean;
     lastlogin?: string;
     createdAt?: string;
+}
+
+export interface CreateUserRequest {
+    firstname: string;
+    lastname: string;
+    email: string;
+    password: string;
+    userroleid: number;
+    groupid: number;
 }
 
 export interface Group {

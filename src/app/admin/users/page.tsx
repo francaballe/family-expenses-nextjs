@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import MainLayout from '@/components/MainLayout';
-import { usersApi, groupsApi, rolesApi, User, Group, Role } from '@/lib/api';
+import { usersApi, groupsApi, rolesApi, User, Group, Role, CreateUserRequest } from '@/lib/api';
 
 interface UserFormData {
     firstname: string;
