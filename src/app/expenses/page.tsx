@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/contexts/auth-context';
+import { useLanguage } from '@/contexts/language-context';
 import MainLayout from '@/components/MainLayout';
 import { expensesApi, closedMonthsApi, Expense } from '@/lib/api';
 
@@ -9,6 +10,7 @@ type ViewMode = 'details' | 'summary';
 
 export default function MyExpensesPage() {
     const { user, isLoading: authLoading } = useAuth();
+    const { t } = useLanguage();
     const [expenses, setExpenses] = useState<Expense[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -19,8 +21,9 @@ export default function MyExpensesPage() {
     const [isClosingMonth, setIsClosingMonth] = useState(false);
 
     const months = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
+        t('month.january'), t('month.february'), t('month.march'), t('month.april'), 
+        t('month.may'), t('month.june'), t('month.july'), t('month.august'), 
+        t('month.september'), t('month.october'), t('month.november'), t('month.december')
     ];
 
     const years = useMemo(() => {
@@ -147,7 +150,7 @@ export default function MyExpensesPage() {
         <MainLayout>
             <div className="max-w-4xl mx-auto">
                 <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
-                    📊 My Expenses
+                    📈 {t('expensesTitle')}
                 </h1>
 
                 {/* Month/Year Selector and View Toggle */}
@@ -180,7 +183,7 @@ export default function MyExpensesPage() {
                                     : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
                                 }`}
                         >
-                            Details
+                            {t('details')}
                         </button>
                         <button
                             onClick={() => setViewMode('summary')}
@@ -189,7 +192,7 @@ export default function MyExpensesPage() {
                                     : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
                                 }`}
                         >
-                            Summary
+                            {t('summary')}
                         </button>
                     </div>
                 </div>
@@ -210,16 +213,16 @@ export default function MyExpensesPage() {
                         {/* First User Expenses */}
                         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
                             <h2 className="text-lg font-semibold text-secondary mb-4">
-                                Expenses for {firstUser?.firstname || 'User 1'}
+                                {t('expensesForTitle')} {firstUser?.firstname || 'User 1'}
                             </h2>
                             {expensesByFirstUser.length === 0 ? (
-                                <p className="text-gray-500 text-center py-4">No expenses this month</p>
+                                <p className="text-gray-500 text-center py-4">{t('noExpenses')}</p>
                             ) : (
                                 <div className="space-y-2">
                                     <div className="grid grid-cols-3 gap-4 text-sm font-medium text-gray-500 pb-2 border-b">
-                                        <span>Concept</span>
-                                        <span className="text-right">Amount</span>
-                                        <span className="text-right">Date</span>
+                                        <span>{t('concept')}</span>
+                                        <span className="text-right">{t('amount')}</span>
+                                        <span className="text-right">{t('date')}</span>
                                     </div>
                                     {expensesByFirstUser.map((expense, idx) => (
                                         <div key={idx} className="grid grid-cols-3 gap-4 py-2 border-b border-gray-100 dark:border-gray-700">
@@ -235,7 +238,7 @@ export default function MyExpensesPage() {
                                         </div>
                                     ))}
                                     <div className="flex justify-between pt-2 font-semibold">
-                                        <span>Total</span>
+                                        <span>{t('total')}</span>
                                         <span className="text-primary">{formatAmount(totalFirstUser)}</span>
                                     </div>
                                 </div>
@@ -246,16 +249,16 @@ export default function MyExpensesPage() {
                         {secondUser && (
                             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
                                 <h2 className="text-lg font-semibold text-secondary mb-4">
-                                    Expenses for {secondUser.firstname}
+                                    {t('expensesForTitle')} {secondUser.firstname}
                                 </h2>
                                 {expensesBySecondUser.length === 0 ? (
-                                    <p className="text-gray-500 text-center py-4">No expenses this month</p>
+                                    <p className="text-gray-500 text-center py-4">{t('noExpenses')}</p>
                                 ) : (
                                     <div className="space-y-2">
                                         <div className="grid grid-cols-3 gap-4 text-sm font-medium text-gray-500 pb-2 border-b">
-                                            <span>Concept</span>
-                                            <span className="text-right">Amount</span>
-                                            <span className="text-right">Date</span>
+                                            <span>{t('concept')}</span>
+                                            <span className="text-right">{t('amount')}</span>
+                                            <span className="text-right">{t('date')}</span>
                                         </div>
                                         {expensesBySecondUser.map((expense, idx) => (
                                             <div key={idx} className="grid grid-cols-3 gap-4 py-2 border-b border-gray-100 dark:border-gray-700">
@@ -271,7 +274,7 @@ export default function MyExpensesPage() {
                                             </div>
                                         ))}
                                         <div className="flex justify-between pt-2 font-semibold">
-                                            <span>Total</span>
+                                            <span>{t('total')}</span>
                                             <span className="text-primary">{formatAmount(totalSecondUser)}</span>
                                         </div>
                                     </div>

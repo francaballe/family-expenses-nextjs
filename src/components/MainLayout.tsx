@@ -4,6 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
+import { useLanguage } from '@/contexts/language-context';
+import { useLanguage } from '@/contexts/language-context';
 
 interface MainLayoutProps {
     children: React.ReactNode;
@@ -11,27 +13,28 @@ interface MainLayoutProps {
 
 export default function MainLayout({ children }: MainLayoutProps) {
     const { user, logout } = useAuth();
+    const { t } = useLanguage();
     const pathname = usePathname();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const navItems = [
         {
-            name: 'Home',
+            name: t('familyExpensesTitle'),
             path: '/',
             icon: '🏠'
         },
         {
-            name: 'New Expense',
+            name: t('btnNewExpense'),
             path: '/expenses/new',
             icon: '💰'
         },
         {
-            name: 'My Expenses',
+            name: t('btnMyExpenses'),
             path: '/expenses',
             icon: '📊'
         },
         {
-            name: 'Settings',
+            name: t('settingsTitle'),
             path: '/settings',
             icon: '⚙️'
         },
@@ -40,7 +43,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
     // Admin-only items
     if (user?.userRoleId === 0) {
         navItems.push({
-            name: 'Users Admin',
+            name: t('settingsMenuUserBtn'),
             path: '/admin/users',
             icon: '👥'
         });
@@ -59,7 +62,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </button>
-                    <h1 className="text-lg font-bold text-primary">Family Expenses</h1>
+                    <h1 className="text-lg font-bold text-primary">{t('familyExpensesTitle')}</h1>
                     <div className="w-10" /> {/* Spacer for centering */}
                 </div>
             </header>
@@ -81,10 +84,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
             `}>
                 {/* Sidebar Header */}
                 <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                    <h1 className="text-2xl font-bold text-primary">Family Expenses</h1>
+                    <h1 className="text-2xl font-bold text-primary">{t('familyExpensesTitle')}</h1>
                     {user && (
                         <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                            Welcome, {user.firstname}
+                            {t('greetingsTitle')}, {user.firstname}
                         </p>
                     )}
                 </div>
@@ -120,7 +123,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                         className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200"
                     >
                         <span>🚪</span>
-                        <span className="font-medium">Logout</span>
+                        <span className="font-medium">{t('btnLogout')}</span>
                     </button>
                 </div>
             </aside>

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
+import { useLanguage } from '@/contexts/language-context';
 import MainLayout from '@/components/MainLayout';
 import { expensesApi, Expense } from '@/lib/api';
 
@@ -24,6 +25,7 @@ const emptyExpense: ExpenseForm = {
 
 export default function NewExpensePage() {
     const { user, isLoading: authLoading } = useAuth();
+    const { t } = useLanguage();
     const router = useRouter();
     const [expenses, setExpenses] = useState<ExpenseForm[]>([{ ...emptyExpense }]);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -99,7 +101,7 @@ export default function NewExpensePage() {
         <MainLayout>
             <div className="max-w-2xl mx-auto">
                 <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
-                    💰 New Expense
+                    💰 {t('btnNewExpense')}
                 </h1>
 
                 {error && (
@@ -122,7 +124,7 @@ export default function NewExpensePage() {
                         >
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="font-semibold text-gray-700 dark:text-gray-300">
-                                    Expense #{index + 1}
+                                    {t('expenseNumber', { number: (index + 1).toString() })}
                                 </h3>
                                 {expenses.length > 1 && (
                                     <button
@@ -130,7 +132,7 @@ export default function NewExpensePage() {
                                         onClick={() => removeExpense(index)}
                                         className="text-red-500 hover:text-red-700 text-sm"
                                     >
-                                        ✕ Remove
+                                        ✕ {t('remove')}
                                     </button>
                                 )}
                             </div>
@@ -138,14 +140,14 @@ export default function NewExpensePage() {
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                                        Concept *
+                                        {t('concept')} *
                                     </label>
                                     <input
                                         type="text"
                                         value={expense.description || ''}
                                         onChange={(e) => updateExpense(index, 'description', e.target.value)}
                                         className="input"
-                                        placeholder="What did you spend on?"
+                                        placeholder={t('phExpenseDescription')}
                                         required
                                     />
                                 </div>
@@ -153,7 +155,7 @@ export default function NewExpensePage() {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                                            Amount *
+                                            {t('amount')} *
                                         </label>
                                         <input
                                             type="number"
@@ -161,13 +163,13 @@ export default function NewExpensePage() {
                                             value={expense.amount || ''}
                                             onChange={(e) => updateExpense(index, 'amount', e.target.value)}
                                             className="input"
-                                            placeholder="0.00"
+                                            placeholder={t('phExpenseAmount')}
                                             required
                                         />
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                                            Date *
+                                            {t('date')} *
                                         </label>
                                         <input
                                             type="date"
@@ -181,7 +183,7 @@ export default function NewExpensePage() {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                                        Due Date (optional)
+                                        {t('phDueDate')}
                                     </label>
                                     <input
                                         type="date"
@@ -193,13 +195,13 @@ export default function NewExpensePage() {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                                        Comments (optional)
+                                        {t('phAdditionalComments')}
                                     </label>
                                     <textarea
                                         value={expense.comments || ''}
                                         onChange={(e) => updateExpense(index, 'comments', e.target.value)}
                                         className="input min-h-[80px]"
-                                        placeholder="Any additional notes..."
+                                        placeholder={t('phAdditionalComments')}
                                     />
                                 </div>
                             </div>
@@ -212,14 +214,14 @@ export default function NewExpensePage() {
                             onClick={addExpense}
                             className="btn btn-outline flex-1"
                         >
-                            + Add Another Expense
+                            + {t('addAnother')}
                         </button>
                         <button
                             type="submit"
                             disabled={isSubmitting}
                             className="btn btn-primary flex-1"
                         >
-                            {isSubmitting ? 'Saving...' : 'Save Expenses'}
+                            {isSubmitting ? t('saving') : t('btnSaveExpenses')}
                         </button>
                     </div>
                 </form>
