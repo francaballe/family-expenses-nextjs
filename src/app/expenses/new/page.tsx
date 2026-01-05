@@ -18,7 +18,7 @@ interface ExpenseForm {
 const emptyExpense: ExpenseForm = {
     description: '',
     amount: '',
-    expensedate: new Date().toISOString().split('T')[0],
+    expensedate: new Date().toISOString().split('T')[0], // Mantenemos ISO para backend
     duedate: '',
     comments: '',
 };
@@ -50,6 +50,32 @@ export default function NewExpensePage() {
         "Supermercado",
         "Verdulería",
     ];
+
+    // Funciones para formato de fecha argentino (DD/MM/YYYY)
+    const formatDateToArgentine = (isoDate: string): string => {
+        if (!isoDate) return '';
+        const [year, month, day] = isoDate.split('-');
+        return `${day}/${month}/${year}`;
+    };
+
+    const formatDateFromArgentine = (argDate: string): string => {
+        if (!argDate) return '';
+        const parts = argDate.split('/');
+        if (parts.length !== 3) return '';
+        const [day, month, year] = parts;
+        if (day && month && year && day.length === 2 && month.length === 2 && year.length === 4) {
+            return `${year}-${month}-${day}`;
+        }
+        return '';
+    };
+
+    const getTodayArgentineFormat = (): string => {
+        const today = new Date();
+        const day = today.getDate().toString().padStart(2, '0');
+        const month = (today.getMonth() + 1).toString().padStart(2, '0');
+        const year = today.getFullYear().toString();
+        return `${day}/${month}/${year}`;
+    };
 
     if (authLoading) {
         return (
@@ -208,13 +234,43 @@ export default function NewExpensePage() {
                                         <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
                                             {t('date')} *
                                         </label>
-                                        <input
-                                            type="date"
-                                            value={expense.expensedate || ''}
-                                            onChange={(e) => updateExpense(index, 'expensedate', e.target.value)}
-                                            className="input"
-                                            required
-                                        />
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                value={expense.expensedate ? formatDateToArgentine(expense.expensedate) : getTodayArgentineFormat()}
+                                                onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    // Auto-insertar barras
+                                                    let formatted = value.replace(/\D/g, '');
+                                                    if (formatted.length >= 2) {
+                                                        formatted = formatted.substring(0,2) + '/' + formatted.substring(2);
+                                                    }
+                                                    if (formatted.length >= 5) {
+                                                        formatted = formatted.substring(0,5) + '/' + formatted.substring(5,9);
+                                                    }
+                                                    e.target.value = formatted;
+                                                    
+                                                    // Convertir a formato ISO si está completo
+                                                    const isoDate = formatDateFromArgentine(formatted);
+                                                    if (isoDate) {
+                                                        updateExpense(index, 'expensedate', isoDate);
+                                                    }
+                                                }}
+                                                className="input pr-10"
+                                                placeholder="DD/MM/AAAA"
+                                                maxLength={10}
+                                                required
+                                            />
+                                            <input
+                                                type="date"
+                                                value={expense.expensedate || ''}
+                                                onChange={(e) => updateExpense(index, 'expensedate', e.target.value)}
+                                                className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 opacity-0 cursor-pointer"
+                                            />
+                                            <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">
+                                                📅
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -222,12 +278,40 @@ export default function NewExpensePage() {
                                     <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
                                         {t('phDueDate')}
                                     </label>
-                                    <input
-                                        type="date"
-                                        value={expense.duedate || ''}
-                                        onChange={(e) => updateExpense(index, 'duedate', e.target.value)}
-                                        className="input"
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            value={expense.duedate ? formatDateToArgentine(expense.duedate) : ''}
+                                            onChange={(e) => {
+                                                const value = e.target.value;
+                                                // Auto-insertar barras
+                                                let formatted = value.replace(/\D/g, '');
+                                                if (formatted.length >= 2) {
+                                                    formatted = formatted.substring(0,2) + '/' + formatted.substring(2);
+                                                }
+                                                if (formatted.length >= 5) {
+                                                    formatted = formatted.substring(0,5) + '/' + formatted.substring(5,9);
+                                                }
+                                                e.target.value = formatted;
+                                                
+                                                // Convertir a formato ISO si está completo
+                                                const isoDate = formatDateFromArgentine(formatted);
+                                                updateExpense(index, 'duedate', isoDate);
+                                            }}
+                                            className="input pr-10"
+                                            placeholder="DD/MM/AAAA"
+                                            maxLength={10}
+                                        />
+                                        <input
+                                            type="date"
+                                            value={expense.duedate || ''}
+                                            onChange={(e) => updateExpense(index, 'duedate', e.target.value)}
+                                            className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 opacity-0 cursor-pointer"
+                                        />
+                                        <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">
+                                            📅
+                                        </span>
+                                    </div>
                                 </div>
 
                                 <div>
