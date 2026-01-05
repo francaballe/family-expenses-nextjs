@@ -159,7 +159,7 @@ export default function MyExpensesPage() {
                         <select
                             value={selectedMonth}
                             onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-                            className="input flex-1"
+                            className="input w-48"
                         >
                             {months.map((month, idx) => (
                                 <option key={idx + 1} value={idx + 1}>{month}</option>
@@ -168,7 +168,7 @@ export default function MyExpensesPage() {
                         <select
                             value={selectedYear}
                             onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                            className="input w-24"
+                            className="input w-12"
                         >
                             {years.map(year => (
                                 <option key={year} value={year}>{year}</option>
