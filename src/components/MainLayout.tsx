@@ -15,6 +15,20 @@ export default function MainLayout({ children }: MainLayoutProps) {
     const { t } = useLanguage();
     const pathname = usePathname();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+    const handleLogout = () => {
+        setShowLogoutConfirm(true);
+    };
+
+    const confirmLogout = () => {
+        setShowLogoutConfirm(false);
+        logout();
+    };
+
+    const cancelLogout = () => {
+        setShowLogoutConfirm(false);
+    };
 
     const navItems = [
         {
@@ -118,7 +132,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                 {/* Logout Button */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700">
                     <button
-                        onClick={logout}
+                        onClick={handleLogout}
                         className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200"
                     >
                         <span>🚪</span>
@@ -133,6 +147,39 @@ export default function MainLayout({ children }: MainLayoutProps) {
                     {children}
                 </div>
             </main>
+
+            {/* Logout Confirmation Modal */}
+            {showLogoutConfirm && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-sm mx-4 shadow-2xl">
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+                            🚪 {t('btnLogout')}
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-400 mb-6">
+                            {t('diagLogout')}
+                        </p>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={cancelLogout}
+                                className="flex-1 px-4 py-2 rounded-lg transition-colors border"
+                                style={{
+                                    backgroundColor: '#ffffff',
+                                    color: '#000000',
+                                    borderColor: '#d1d5db'
+                                }}
+                            >
+                                {t('cancel')}
+                            </button>
+                            <button
+                                onClick={confirmLogout}
+                                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                            >
+                                {t('btnLogout')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

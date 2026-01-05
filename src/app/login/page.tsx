@@ -54,22 +54,17 @@ export default function LoginPage() {
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 px-4">
-            {/* Logo and Title */}
+            {/* Logo */}
             <div className="text-center mb-8">
-                <div className="mb-4">
-                    <div className="w-48 h-48 md:w-64 md:h-64 mx-auto relative rounded-2xl overflow-hidden shadow-2xl">
-                        <Image
-                            src="/logo.webp"
-                            alt="Family Expenses Logo"
-                            fill
-                            className="object-cover"
-                            priority
-                        />
-                    </div>
+                <div className="w-60 h-60 md:w-80 md:h-80 mx-auto relative rounded-2xl overflow-hidden shadow-2xl">
+                    <Image
+                        src="/NewPortada.png"
+                        alt="Family Expenses Logo"
+                        fill
+                        className="object-cover"
+                        priority
+                    />
                 </div>
-                <h1 className="text-3xl md:text-5xl font-bold text-primary title-text mt-6">
-                    FAMILY EXPENSES
-                </h1>
             </div>
 
             {/* Login Form */}
@@ -134,7 +129,7 @@ export default function LoginPage() {
 
             {/* Version */}
             <div className="mt-8 text-gray-500 text-sm">
-                Version: 2.0.0
+                Version: 3.0.0
             </div>
         </div>
     );
