@@ -32,6 +32,25 @@ export default function NewExpensePage() {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
 
+    // Lista predefinida de conceptos (igual que en la app anterior)
+    const predefinedConcepts = [
+        "ABL",
+        "Agua", 
+        "ARBA",
+        "Bomberos",
+        "Cabify",
+        "Comida",
+        "Enrique",
+        "Facturas",
+        "Gas",
+        "Internet",
+        "Jardín",
+        "Luz",
+        "Servicios",
+        "Supermercado",
+        "Verdulería",
+    ];
+
     if (authLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -142,14 +161,32 @@ export default function NewExpensePage() {
                                     <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
                                         {t('concept')} *
                                     </label>
-                                    <input
-                                        type="text"
-                                        value={expense.description || ''}
-                                        onChange={(e) => updateExpense(index, 'description', e.target.value)}
-                                        className="input"
-                                        placeholder={t('phExpenseDescription')}
-                                        required
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            list={`concepts-${index}`}
+                                            value={expense.description || ''}
+                                            onChange={(e) => updateExpense(index, 'description', e.target.value)}
+                                            className="input pr-16"
+                                            placeholder={t('phExpenseDescription')}
+                                            required
+                                        />
+                                        {expense.description && (
+                                            <button
+                                                type="button"
+                                                onClick={() => updateExpense(index, 'description', '')}
+                                                className="absolute right-10 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                                                aria-label="Clear"
+                                            >
+                                                ✕
+                                            </button>
+                                        )}
+                                        <datalist id={`concepts-${index}`}>
+                                            {predefinedConcepts.map((concept, idx) => (
+                                                <option key={idx} value={concept} />
+                                            ))}
+                                        </datalist>
+                                    </div>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">

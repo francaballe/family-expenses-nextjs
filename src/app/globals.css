@@ -150,6 +150,38 @@ body {
   @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200;
 }
 
+/* Dark mode styles for inputs */
+.dark .input {
+  @apply bg-gray-800 border-gray-600 text-white;
+}
+
+.dark .input option {
+  @apply bg-gray-800 text-white;
+}
+
+.dark .input:focus {
+  @apply border-primary ring-primary/30;
+}
+
+/* Additional dark mode improvements */
+.dark input[type="text"],
+.dark input[type="email"], 
+.dark input[type="password"],
+.dark input[type="number"],
+.dark input[type="date"],
+.dark textarea,
+.dark select {
+  @apply bg-gray-800 border-gray-600 text-white;
+}
+
+.dark input[type="text"]::placeholder,
+.dark input[type="email"]::placeholder,
+.dark input[type="password"]::placeholder,
+.dark input[type="number"]::placeholder,
+.dark textarea::placeholder {
+  @apply text-gray-400;
+}
+
 /* Card styles */
 .card {
   @apply bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6;
