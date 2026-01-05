@@ -122,6 +122,28 @@ export default function MyExpensesPage() {
         }
     }, [totalFirstUser, totalSecondUser, totalMonth, firstUser, secondUser]);
 
+    // Calculate Top 5 expenses by concept
+    const top5Expenses = useMemo(() => {
+        // Group expenses by description and sum amounts
+        const grouped: Record<string, number> = {};
+        expenses.forEach(expense => {
+            grouped[expense.description] = (grouped[expense.description] || 0) + expense.amount;
+        });
+
+        // Convert to array and sort by amount
+        const sortedExpenses = Object.entries(grouped)
+            .map(([description, amount]) => ({ description, amount }))
+            .sort((a, b) => b.amount - a.amount)
+            .slice(0, 5);
+
+        // Fill with empty items if less than 5
+        while (sortedExpenses.length < 5) {
+            sortedExpenses.push({ description: t('lbNoTop5Item'), amount: 0 });
+        }
+
+        return sortedExpenses;
+    }, [expenses, t]);
+
     const formatAmount = (amount: number) => {
         return new Intl.NumberFormat('es-AR', {
             style: 'currency',
@@ -247,9 +269,22 @@ export default function MyExpensesPage() {
                                     </div>
                                     {expensesByFirstUser.map((expense, idx) => (
                                         <div key={idx} className="grid grid-cols-3 gap-4 py-2 border-b border-gray-100 dark:border-gray-700">
-                                            <span className="text-gray-800 dark:text-gray-200 truncate" title={expense.description || ''}>
-                                                {expense.description || ''}
-                                            </span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-gray-800 dark:text-gray-200 truncate" title={expense.description || ''}>
+                                                    {expense.description || ''}
+                                                </span>
+                                                {(expense.duedate || expense.comments) && (
+                                                    <div 
+                                                        className="text-accent cursor-help"
+                                                        title={[
+                                                            expense.duedate ? `${t('phDueDate')}: ${formatDate(expense.duedate)}` : '',
+                                                            expense.comments ? `${t('commentsToolTip')}: ${expense.comments}` : ''
+                                                        ].filter(Boolean).join('\n')}
+                                                    >
+                                                        ℹ️
+                                                    </div>
+                                                )}
+                                            </div>
                                             <span className="text-right text-primary font-medium">
                                                 {formatAmount(expense.amount)}
                                             </span>
@@ -283,9 +318,22 @@ export default function MyExpensesPage() {
                                         </div>
                                         {expensesBySecondUser.map((expense, idx) => (
                                             <div key={idx} className="grid grid-cols-3 gap-4 py-2 border-b border-gray-100 dark:border-gray-700">
-                                                <span className="text-gray-800 dark:text-gray-200 truncate" title={expense.description || ''}>
-                                                    {expense.description || ''}
-                                                </span>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-gray-800 dark:text-gray-200 truncate" title={expense.description || ''}>
+                                                        {expense.description || ''}
+                                                    </span>
+                                                    {(expense.duedate || expense.comments) && (
+                                                        <div 
+                                                            className="text-accent cursor-help"
+                                                            title={[
+                                                                expense.duedate ? `${t('phDueDate')}: ${formatDate(expense.duedate)}` : '',
+                                                                expense.comments ? `${t('commentsToolTip')}: ${expense.comments}` : ''
+                                                            ].filter(Boolean).join('\n')}
+                                                        >
+                                                            ℹ️
+                                                        </div>
+                                                    )}
+                                                </div>
                                                 <span className="text-right text-primary font-medium">
                                                     {formatAmount(expense.amount)}
                                                 </span>
@@ -314,7 +362,7 @@ export default function MyExpensesPage() {
                             {/* User Totals */}
                             <div className="flex justify-between items-center py-3 border-b border-gray-200 dark:border-gray-700">
                                 <span className="text-gray-700 dark:text-gray-300">
-                                    {t('totalDebtTitle')} {firstUser?.firstname || 'User 1'}:
+                                    Total {firstUser?.firstname || 'User 1'}:
                                 </span>
                                 <span className="font-semibold text-primary text-lg">
                                     {formatAmount(totalFirstUser)}
@@ -324,7 +372,7 @@ export default function MyExpensesPage() {
                             {secondUser && (
                                 <div className="flex justify-between items-center py-3 border-b border-gray-200 dark:border-gray-700">
                                     <span className="text-gray-700 dark:text-gray-300">
-                                        {t('totalDebtTitle')} {secondUser.firstname}:
+                                        Total {secondUser.firstname}:
                                     </span>
                                     <span className="font-semibold text-primary text-lg">
                                         {formatAmount(totalSecondUser)}
@@ -346,13 +394,41 @@ export default function MyExpensesPage() {
                             {debt.amount > 0 && (
                                 <div className="flex justify-between items-center py-3 bg-accent/10 rounded-lg px-4 mt-4">
                                     <span className="text-accent font-medium">
-                                        {debt.user} {t('totalDebtTitle')} {debt.owesTo}:
+                                        {t('totalDebtTitle')} {debt.user}:
                                     </span>
                                     <span className="font-bold text-accent text-lg">
                                         {formatAmount(debt.amount)}
                                     </span>
                                 </div>
                             )}
+
+                            {/* Top 5 Section */}
+                            <div className="mt-6">
+                                <div className="border-t-2 border-gray-300 dark:border-gray-600 pt-6">
+                                    <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
+                                        {t('top5ThisMonthTitle')}
+                                    </h3>
+                                    <div className="space-y-2">
+                                        {top5Expenses.map((expense, index) => (
+                                            <div
+                                                key={index}
+                                                className={`flex justify-between items-center py-2 px-4 rounded-lg ${
+                                                    index % 2 === 0
+                                                        ? 'bg-gray-100 dark:bg-gray-700'
+                                                        : 'bg-white dark:bg-gray-800'
+                                                }`}
+                                            >
+                                                <span className="text-gray-700 dark:text-gray-300 font-medium">
+                                                    {expense.description}
+                                                </span>
+                                                <span className="text-gray-800 dark:text-gray-200 font-semibold">
+                                                    {expense.amount > 0 ? formatAmount(expense.amount) : '-'}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
 
                             {/* Close Month Button */}
                             <div className="pt-6 flex justify-center">
