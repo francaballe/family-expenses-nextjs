@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { useAuth } from '@/contexts/auth-context';
 import { useLanguage } from '@/contexts/language-context';
 import MainLayout from '@/components/MainLayout';
+import Tooltip from '@/components/Tooltip';
 import { expensesApi, closedMonthsApi, Expense } from '@/lib/api';
 
 // Dynamic import for ApexCharts to avoid SSR issues
@@ -274,19 +275,21 @@ export default function MyExpensesPage() {
                                     {expensesByFirstUser.map((expense, idx) => (
                                         <div key={idx} className="grid grid-cols-3 gap-4 py-2 border-b border-gray-100 dark:border-gray-700">
                                             <div className="flex items-center gap-2">
-                                                <span className="text-gray-800 dark:text-gray-200 truncate" title={expense.description || ''}>
+                                                <span className="text-gray-800 dark:text-gray-200 truncate">
                                                     {expense.description || ''}
                                                 </span>
                                                 {(expense.duedate || expense.comments) && (
-                                                    <div 
-                                                        className="text-accent cursor-help"
-                                                        title={[
+                                                    <Tooltip
+                                                        content={[
                                                             expense.duedate ? `${t('phDueDate')}: ${formatDate(expense.duedate)}` : '',
                                                             expense.comments ? `${t('commentsToolTip')}: ${expense.comments}` : ''
                                                         ].filter(Boolean).join('\n')}
+                                                        position="top"
                                                     >
-                                                        ℹ️
-                                                    </div>
+                                                        <div className="text-accent cursor-help">
+                                                            ℹ️
+                                                        </div>
+                                                    </Tooltip>
                                                 )}
                                             </div>
                                             <span className="text-right text-primary font-medium">
@@ -323,19 +326,21 @@ export default function MyExpensesPage() {
                                         {expensesBySecondUser.map((expense, idx) => (
                                             <div key={idx} className="grid grid-cols-3 gap-4 py-2 border-b border-gray-100 dark:border-gray-700">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-gray-800 dark:text-gray-200 truncate" title={expense.description || ''}>
+                                                    <span className="text-gray-800 dark:text-gray-200 truncate">
                                                         {expense.description || ''}
                                                     </span>
                                                     {(expense.duedate || expense.comments) && (
-                                                        <div 
-                                                            className="text-accent cursor-help"
-                                                            title={[
+                                                        <Tooltip
+                                                            content={[
                                                                 expense.duedate ? `${t('phDueDate')}: ${formatDate(expense.duedate)}` : '',
                                                                 expense.comments ? `${t('commentsToolTip')}: ${expense.comments}` : ''
                                                             ].filter(Boolean).join('\n')}
+                                                            position="top"
                                                         >
-                                                            ℹ️
-                                                        </div>
+                                                            <div className="text-accent cursor-help">
+                                                                ℹ️
+                                                            </div>
+                                                        </Tooltip>
                                                     )}
                                                 </div>
                                                 <span className="text-right text-primary font-medium">
