@@ -21,6 +21,11 @@ interface TranslationKeys {
     expensesForTitle: string;
     analyticsTitle: string;
     closingMonthTitle: string;
+    monthSummary: string;
+    confirmCloseMonth: string;
+    confirmCloseMonthText: string;
+    actionCannotBeUndone: string;
+    closing: string;
 
     // Themes
     'theme.Mountains': string;
@@ -257,7 +262,12 @@ const translations: Translations = {
         totalThisMonthTitle: "Total this Month",
         expensesForTitle: "Expenses for",
         analyticsTitle: "Analytics",
-        closingMonthTitle: "Are sure you want to close this month?",
+        closingMonthTitle: "Are you sure you want to close this month?",
+        monthSummary: "Month Summary",
+        confirmCloseMonth: "Confirm Close Month",
+        confirmCloseMonthText: "Are you sure you want to close {{month}} {{year}}?",
+        actionCannotBeUndone: "This action cannot be undone.",
+        closing: "Closing...",
 
         // Themes
         'theme.Mountains': "Mountains",
@@ -485,6 +495,11 @@ const translations: Translations = {
         expensesForTitle: "Gastos de",
         analyticsTitle: "Analítica",
         closingMonthTitle: "¿Está seguro de querer cerrar este mes?",
+        monthSummary: "Resumen del Mes",
+        confirmCloseMonth: "Confirmar Cerrar Mes",
+        confirmCloseMonthText: "¿Está seguro de que desea cerrar {{month}} {{year}}?",
+        actionCannotBeUndone: "Esta acción no se puede deshacer.",
+        closing: "Cerrando...",
 
         // Themes
         'theme.Mountains': "Montañas",
