@@ -3,50 +3,45 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { useLanguage } from '@/contexts/language-context';
+import { useTheme } from '@/contexts/theme-context';
 import MainLayout from '@/components/MainLayout';
-import { usersApi } from '@/lib/api';
+import { usersApi, groupsApi } from '@/lib/api';
 
 export default function SettingsPage() {
     const { user, isLoading: authLoading } = useAuth();
     const { language, setLanguage, t } = useLanguage();
+    const { theme, toggleTheme } = useTheme();
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
-    
-    // Theme state
-    const [isDarkMode, setIsDarkMode] = useState(false);
+    const [groups, setGroups] = useState<any[]>([]);
+    const [userGroupName, setUserGroupName] = useState<string>('');
 
+    // Cargar nombre del grupo del usuario
     useEffect(() => {
-        // Initialize theme from localStorage or system preference
-        const savedTheme = localStorage.getItem('family-expenses-theme');
-        
-        if (savedTheme) {
-            setIsDarkMode(savedTheme === 'dark');
-        } else {
-            setIsDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
-        }
-        
-        // Apply theme to document
-        updateTheme(savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches));
-    }, []);
+        const loadUserGroupName = async () => {
+            if (!user) return;
+            
+            try {
+                const groupsData = await groupsApi.getAll();
+                const userGroup = groupsData.find((g: any) => g._id === user.groupid);
+                
+                if (userGroup) {
+                    setUserGroupName(userGroup.name);
+                } else {
+                    setUserGroupName(`Grupo ${user.groupid}`);
+                }
+            } catch (error) {
+                console.error('Error loading user group:', error);
+                setUserGroupName(`Grupo ${user.groupid}`);
+            }
+        };
 
-    const updateTheme = (dark: boolean) => {
-        if (dark) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    };
-
-    const toggleTheme = () => {
-        const newIsDark = !isDarkMode;
-        setIsDarkMode(newIsDark);
-        updateTheme(newIsDark);
-        localStorage.setItem('family-expenses-theme', newIsDark ? 'dark' : 'light');
-    };
+        loadUserGroupName();
+    }, [user]);
 
     const toggleLanguage = () => {
         const newLanguage = language === 'en' ? 'es' : 'en';
@@ -101,8 +96,15 @@ export default function SettingsPage() {
 
     return (
         <MainLayout>
-            <div className="max-w-lg mx-auto">
-                <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
+            <div className="max-w-lg mx-auto" style={{
+                backgroundColor: theme === 'dark' ? '#1f1f1f' : '#ffffff',
+                color: theme === 'dark' ? '#ffffff' : '#000000',
+                minHeight: '100vh',
+                padding: '1rem'
+            }}>
+                <h1 className="text-2xl font-bold mb-6" style={{
+                    color: theme === 'dark' ? '#ffffff' : '#1f2937'
+                }}>
                     ⚙️ {t('settings.title')}
                 </h1>
 
@@ -127,7 +129,7 @@ export default function SettingsPage() {
                         <div className="flex justify-between">
                             <span className="text-gray-500">{t('settings.groupId')}:</span>
                             <span className="font-medium text-gray-800 dark:text-white">
-                                {user.groupid}
+                                {userGroupName || `Grupo ${user.groupid}`}
                             </span>
                         </div>
                     </div>
@@ -206,13 +208,22 @@ export default function SettingsPage() {
                     
                     <div className="space-y-6">
                         {/* Theme Toggle */}
-                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <div className="flex items-center justify-between p-4 rounded-lg" style={{
+                            backgroundColor: theme === 'dark' ? '#374151' : '#f9fafb',
+                            borderWidth: '1px',
+                            borderStyle: 'solid',
+                            borderColor: theme === 'dark' ? '#4b5563' : '#e5e7eb'
+                        }}>
                             <div>
-                                <h3 className="font-medium text-gray-800 dark:text-white">
-                                    {isDarkMode ? '🌙' : '☀️'} {t('settings.theme')}
+                                <h3 className="font-medium" style={{
+                                    color: theme === 'dark' ? '#ffffff' : '#1f2937'
+                                }}>
+                                    {theme === 'dark' ? '🌙' : '☀️'} {t('settings.theme')}
                                 </h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    {isDarkMode ? t('settings.darkMode') : t('settings.lightMode')}
+                                <p className="text-sm" style={{
+                                    color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+                                }}>
+                                    {theme === 'dark' ? t('settings.darkMode') : t('settings.lightMode')}
                                 </p>
                             </div>
                             <button
@@ -221,7 +232,7 @@ export default function SettingsPage() {
                             >
                                 <span
                                     className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                        isDarkMode ? 'translate-x-6' : 'translate-x-1'
+                                        theme === 'dark' ? 'translate-x-6' : 'translate-x-1'
                                     }`}
                                 />
                             </button>

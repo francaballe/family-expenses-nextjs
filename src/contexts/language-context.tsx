@@ -219,6 +219,17 @@ interface TranslationKeys {
     'settings.language': string;
     'settings.english': string;
     'settings.spanish': string;
+
+    // Home page
+    'home.welcome': string;
+    'home.whatToDo': string;
+    'home.newExpenseSummary': string;
+    'home.myExpensesSummary': string;
+    'home.comingSoon': string;
+    'home.manageUsersSummary': string;
+    'home.userSettings': string;
+    'home.userSettingsSummary': string;
+    'home.administration': string;
 }
 
 type Translations = Record<Language, TranslationKeys>;
@@ -431,7 +442,7 @@ const translations: Translations = {
         'settings.accountInfo': 'Account Information',
         'settings.name': 'Name',
         'settings.email': 'Email',
-        'settings.groupId': 'Group ID',
+        'settings.groupId': 'Group',
         'settings.changePassword': 'Change Password',
         'settings.currentPassword': 'Current Password',
         'settings.newPassword': 'New Password',
@@ -445,6 +456,17 @@ const translations: Translations = {
         'settings.language': 'Language',
         'settings.english': 'English',
         'settings.spanish': 'Español',
+
+        // Home page
+        'home.welcome': 'Welcome, {name}!',
+        'home.whatToDo': 'What would you like to do today?',
+        'home.newExpenseSummary': 'Add a new expense to track',
+        'home.myExpensesSummary': 'View and manage your expenses',
+        'home.comingSoon': 'Coming soon',
+        'home.manageUsersSummary': 'Manage users and roles',
+        'home.userSettings': 'User Settings',
+        'home.userSettingsSummary': 'Change password and preferences',
+        'home.administration': 'Administration',
     },
     es: {
         // Titles
@@ -647,7 +669,7 @@ const translations: Translations = {
         'settings.accountInfo': 'Información de la Cuenta',
         'settings.name': 'Nombre',
         'settings.email': 'Email',
-        'settings.groupId': 'ID del Grupo',
+        'settings.groupId': 'Grupo',
         'settings.changePassword': 'Cambiar Contraseña',
         'settings.currentPassword': 'Contraseña Actual',
         'settings.newPassword': 'Nueva Contraseña',
@@ -661,6 +683,17 @@ const translations: Translations = {
         'settings.language': 'Idioma',
         'settings.english': 'English',
         'settings.spanish': 'Español',
+
+        // Home page
+        'home.welcome': '¡Bienvenido, {name}!',
+        'home.whatToDo': '¿Qué te gustaría hacer hoy?',
+        'home.newExpenseSummary': 'Agregar un nuevo gasto para seguimiento',
+        'home.myExpensesSummary': 'Ver y gestionar tus gastos',
+        'home.comingSoon': 'Próximamente',
+        'home.manageUsersSummary': 'Gestionar usuarios y roles',
+        'home.userSettings': 'Configuración de Usuario',
+        'home.userSettingsSummary': 'Cambiar contraseña y preferencias',
+        'home.administration': 'Administración',
     }
 };
 

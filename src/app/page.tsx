@@ -1,11 +1,13 @@
 'use client';
 
 import { useAuth } from '@/contexts/auth-context';
+import { useLanguage } from '@/contexts/language-context';
 import MainLayout from '@/components/MainLayout';
 import PathList from '@/components/PathList';
 
 export default function HomePage() {
   const { user, isLoading } = useAuth();
+  const { t } = useLanguage();
 
   if (isLoading) {
     return (
@@ -21,36 +23,29 @@ export default function HomePage() {
 
   const expensesPaths = [
     {
-      name: 'New Expense',
+      name: t('btnNewExpense'),
       icon: '💰',
       path: '/expenses/new',
       disabled: false,
-      summary: 'Add a new expense to track',
+      summary: t('home.newExpenseSummary'),
     },
     {
-      name: 'My Expenses',
+      name: t('btnMyExpenses'),
       icon: '📊',
       path: '/expenses',
       disabled: false,
-      summary: 'View and manage your expenses',
-    },
-    {
-      name: 'Expense History',
-      icon: '📈',
-      path: '/expenses/history',
-      disabled: true,
-      summary: 'Coming soon',
+      summary: t('home.myExpensesSummary'),
     },
   ];
 
   // Admin-only paths
   const adminPaths = user.userRoleId === 0 ? [
     {
-      name: 'Users Admin',
+      name: t('settingsMenuUserBtn'),
       icon: '👥',
       path: '/admin/users',
       disabled: false,
-      summary: 'Manage users and roles',
+      summary: t('home.manageUsersSummary'),
     },
   ] : [];
 
@@ -60,10 +55,10 @@ export default function HomePage() {
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
-            Welcome, {user.firstname}! 👋
+            {t('home.welcome', { name: user.firstname })} 👋
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            What would you like to do today?
+            {t('home.whatToDo')}
           </p>
         </div>
 
@@ -71,7 +66,7 @@ export default function HomePage() {
         <section className="mb-8">
           <div className="flex items-center gap-3 mb-4">
             <span className="text-2xl">💵</span>
-            <h2 className="text-xl font-semibold text-secondary">Expenses</h2>
+            <h2 className="text-xl font-semibold text-secondary">{t('expensesTitle')}</h2>
           </div>
           <PathList paths={expensesPaths} />
         </section>
@@ -80,15 +75,15 @@ export default function HomePage() {
         <section className="mb-8">
           <div className="flex items-center gap-3 mb-4">
             <span className="text-2xl">⚙️</span>
-            <h2 className="text-xl font-semibold text-secondary">Settings</h2>
+            <h2 className="text-xl font-semibold text-secondary">{t('settingsTitle')}</h2>
           </div>
           <PathList paths={[
             {
-              name: 'User Settings',
+              name: t('home.userSettings'),
               icon: '👤',
               path: '/settings',
               disabled: false,
-              summary: 'Change password and preferences',
+              summary: t('home.userSettingsSummary'),
             },
           ]} />
         </section>
@@ -98,7 +93,7 @@ export default function HomePage() {
           <section className="mb-8">
             <div className="flex items-center gap-3 mb-4">
               <span className="text-2xl">🔧</span>
-              <h2 className="text-xl font-semibold text-secondary">Administration</h2>
+              <h2 className="text-xl font-semibold text-secondary">{t('home.administration')}</h2>
             </div>
             <PathList paths={adminPaths} />
           </section>
