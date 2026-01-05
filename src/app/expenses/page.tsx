@@ -1,10 +1,14 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { useAuth } from '@/contexts/auth-context';
 import { useLanguage } from '@/contexts/language-context';
 import MainLayout from '@/components/MainLayout';
 import { expensesApi, closedMonthsApi, Expense } from '@/lib/api';
+
+// Dynamic import for ApexCharts to avoid SSR issues
+const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 type ViewMode = 'details' | 'summary';
 
@@ -430,11 +434,80 @@ export default function MyExpensesPage() {
                                 </div>
                             </div>
 
+                            {/* Analytics Section */}
+                            <div className="mt-6">
+                                <div className="border-t-2 border-gray-300 dark:border-gray-600 pt-6">
+                                    <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
+                                        {t('analyticsTitle')}
+                                    </h3>
+                                    <div className="flex justify-center">
+                                        {typeof window !== 'undefined' && (
+                                            <Chart
+                                                options={{
+                                                    chart: {
+                                                        type: 'pie',
+                                                    },
+                                                    labels: [
+                                                        ...top5Expenses.slice(0, 5).map(e => e.description),
+                                                        t('lbChartOthers')
+                                                    ],
+                                                    colors: [
+                                                        "#FF5733",
+                                                        "#FFD700", 
+                                                        "#33FF57",
+                                                        "#3366FF",
+                                                        "#FFC0CB",
+                                                        "#800080"
+                                                    ],
+                                                    tooltip: {
+                                                        y: {
+                                                            formatter: function(value: number) {
+                                                                return value.toFixed(1) + '%';
+                                                            }
+                                                        }
+                                                    },
+                                                    legend: {
+                                                        position: 'bottom',
+                                                        labels: {
+                                                            colors: '#6B7280'
+                                                        }
+                                                    },
+                                                    responsive: [{
+                                                        breakpoint: 480,
+                                                        options: {
+                                                            chart: {
+                                                                width: 300
+                                                            },
+                                                            legend: {
+                                                                position: 'bottom'
+                                                            }
+                                                        }
+                                                    }]
+                                                }}
+                                                series={(() => {
+                                                    const top5Total = top5Expenses.slice(0, 5).reduce((sum, e) => sum + e.amount, 0);
+                                                    const othersAmount = Math.max(0, totalMonth - top5Total);
+                                                    
+                                                    const percentages = [
+                                                        ...top5Expenses.slice(0, 5).map(e => totalMonth > 0 ? (e.amount * 100) / totalMonth : 0),
+                                                        totalMonth > 0 ? (othersAmount * 100) / totalMonth : 0
+                                                    ];
+                                                    
+                                                    return percentages;
+                                                })()}
+                                                type="pie"
+                                                width={500}
+                                            />
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
                             {/* Close Month Button */}
                             <div className="pt-6 flex justify-center">
                                 <button
                                     onClick={() => setShowCloseMonthModal(true)}
-                                    className="btn btn-primary"
+                                    className={`btn btn-primary ${expenses.length === 0 || isMonthClosed ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                                     disabled={expenses.length === 0 || isMonthClosed}
                                 >
                                     {t('btnPayAndCloseMonth')}
