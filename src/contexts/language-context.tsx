@@ -265,7 +265,7 @@ const translations: Translations = {
         closingMonthTitle: "Are you sure you want to close this month?",
         monthSummary: "Month Summary",
         confirmCloseMonth: "Confirm Close Month",
-        confirmCloseMonthText: "Are you sure you want to close {{month}} {{year}}?",
+        confirmCloseMonthText: "Are you sure you want to close {month} {year}?",
         actionCannotBeUndone: "This action cannot be undone.",
         closing: "Closing...",
 
@@ -497,7 +497,7 @@ const translations: Translations = {
         closingMonthTitle: "¿Está seguro de querer cerrar este mes?",
         monthSummary: "Resumen del Mes",
         confirmCloseMonth: "Confirmar Cerrar Mes",
-        confirmCloseMonthText: "¿Está seguro de que desea cerrar {{month}} {{year}}?",
+        confirmCloseMonthText: "¿Está seguro de que desea cerrar {month} {year}?",
         actionCannotBeUndone: "Esta acción no se puede deshacer.",
         closing: "Cerrando...",
 
