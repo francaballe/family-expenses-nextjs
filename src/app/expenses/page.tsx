@@ -25,6 +25,7 @@ export default function MyExpensesPage() {
     const [showCloseMonthModal, setShowCloseMonthModal] = useState(false);
     const [isClosingMonth, setIsClosingMonth] = useState(false);
     const [isMonthClosed, setIsMonthClosed] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const months = [
         t('month.january'), t('month.february'), t('month.march'), t('month.april'), 
@@ -86,16 +87,47 @@ export default function MyExpensesPage() {
     const firstUser = user?.usersInGroup[0];
     const secondUser = user?.usersInGroup[1];
 
-    // Filter expenses by user
-    const expensesByFirstUser = useMemo(() =>
-        expenses.filter(e => e.userid === firstUser?._id),
-        [expenses, firstUser]
-    );
+    // Helper functions for formatting
+    const formatAmount = (amount: number) => {
+        return new Intl.NumberFormat('es-AR', {
+            style: 'currency',
+            currency: 'ARS',
+        }).format(amount);
+    };
 
-    const expensesBySecondUser = useMemo(() =>
-        expenses.filter(e => e.userid === secondUser?._id),
-        [expenses, secondUser]
-    );
+    const formatDate = (dateStr: string) => {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('es-AR');
+    };
+
+    // Filter expenses by user and search query
+    const expensesByFirstUser = useMemo(() => {
+        let filtered = expenses.filter(e => e.userid === firstUser?._id);
+        
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase();
+            filtered = filtered.filter(expense => 
+                (expense.description || '').toLowerCase().includes(query) ||
+                formatDate(expense.expensedate).includes(query)
+            );
+        }
+        
+        return filtered;
+    }, [expenses, firstUser, searchQuery]);
+
+    const expensesBySecondUser = useMemo(() => {
+        let filtered = expenses.filter(e => e.userid === secondUser?._id);
+        
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase();
+            filtered = filtered.filter(expense => 
+                (expense.description || '').toLowerCase().includes(query) ||
+                formatDate(expense.expensedate).includes(query)
+            );
+        }
+        
+        return filtered;
+    }, [expenses, secondUser, searchQuery]);
 
     // Calculate totals
     const totalFirstUser = useMemo(() =>
@@ -148,18 +180,6 @@ export default function MyExpensesPage() {
 
         return sortedExpenses;
     }, [expenses, t]);
-
-    const formatAmount = (amount: number) => {
-        return new Intl.NumberFormat('es-AR', {
-            style: 'currency',
-            currency: 'ARS',
-        }).format(amount);
-    };
-
-    const formatDate = (dateStr: string) => {
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('es-AR');
-    };
 
     const handleCloseMonth = async () => {
         if (!user) return;
@@ -249,6 +269,28 @@ export default function MyExpensesPage() {
                         </button>
                     </div>
                 </div>
+
+                {/* Search Input - only show in details view */}
+                {viewMode === 'details' && (
+                    <div className="mb-4">
+                        <input
+                            type="text"
+                            placeholder={t('phSearchExpenseDescOrDate')}
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="input w-full max-w-md"
+                        />
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery('')}
+                                className="ml-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                title="Clear search"
+                            >
+                                ✕
+                            </button>
+                        )}
+                    </div>
+                )}
 
                 {error && (
                     <div className="mb-4 p-4 bg-red-100 border border-red-300 text-red-700 rounded-xl">
