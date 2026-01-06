@@ -77,8 +77,25 @@ export default async function sendEmail(dateAndGroupData: EmailData) {
     // Get expenses for the month and group
     let currentMonthData = [];
     if (monthandyear && groupid) {
-        const startDate = new Date(parseInt('20' + year), parseInt(month) - 1, 1);
-        const endDate = new Date(parseInt('20' + year), parseInt(month), 0, 23, 59, 59);
+        // Parse the year correctly - it comes as 4 digits in monthandyear (e.g., "122024")
+        const yearPart = year.length === 2 ? '20' + year : year;
+        const fullYear = parseInt(yearPart);
+        const monthNum = parseInt(month);
+        
+        console.log('Searching expenses for:', {
+            monthandyear,
+            month: monthNum,
+            year: fullYear,
+            groupid
+        });
+        
+        const startDate = new Date(fullYear, monthNum - 1, 1);
+        const endDate = new Date(fullYear, monthNum, 0, 23, 59, 59);
+        
+        console.log('Date range:', {
+            startDate: startDate.toISOString(),
+            endDate: endDate.toISOString()
+        });
         
         const userIds = usersInGroup.map(user => user._id);
         
@@ -89,6 +106,8 @@ export default async function sendEmail(dateAndGroupData: EmailData) {
                 $lte: endDate.toISOString()
             }
         }).populate('userid', 'firstname email groupid').lean();
+        
+        console.log('Found expenses:', currentMonthData.length);
         
     } else {
         throw new Error('year, month and/or groupid has not been provided.');
@@ -118,7 +137,8 @@ export default async function sendEmail(dateAndGroupData: EmailData) {
     const firstUserId = usersInGroup[0]._id.toString();
     const from = `"Family Expenses" <${mailConfig.user}>`;
     const to = [usersInGroup[0].email, usersInGroup[1].email];
-    const subject = "Gastos Familiares - " + months[parseInt(month) - 1] + " " + year;
+    const yearForSubject = year.length === 2 ? '20' + year : year;
+    const subject = "Gastos Familiares - " + months[parseInt(month) - 1] + " " + yearForSubject;
     
     // Calculate totals and separate expenses by user
     const firstUserArray = [];

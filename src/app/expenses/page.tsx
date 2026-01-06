@@ -175,8 +175,13 @@ export default function MyExpensesPage() {
                     { userId: secondUser?._id || '', total: totalSecondUser },
                 ],
             });
+            
+            // Update UI state to reflect that month is now closed
+            setIsMonthClosed(true);
             setShowCloseMonthModal(false);
-            // Optionally navigate to next month
+            
+            // Refresh data to show updated state
+            fetchExpenses();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to close month');
         } finally {
