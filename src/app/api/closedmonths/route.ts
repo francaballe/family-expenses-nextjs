@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import ClosedMonth from '@/models/ClosedMonth';
 import { verifyToken, unauthorizedResponse } from '@/lib/auth';
+import sendEmail from '@/lib/sendEmail';
 
 export async function GET(req: NextRequest) {
     const user = verifyToken(req);
@@ -49,7 +50,19 @@ export async function POST(req: NextRequest) {
     try {
         await dbConnect();
         const data = await req.json();
+        
+        // Create the closed month
         const newClosedMonth = await ClosedMonth.create(data);
+        
+        // Send email notification
+        try {
+            await sendEmail(data);
+            console.log('Email sent successfully for closed month:', data.monthandyear);
+        } catch (emailError) {
+            console.error('Failed to send email for closed month:', emailError);
+            // Don't fail the request if email fails, just log it
+        }
+        
         return NextResponse.json(newClosedMonth);
     } catch (error: any) {
         console.error('Error creating closed month:', error);
