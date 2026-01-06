@@ -23,7 +23,7 @@ export default function SettingsPage() {
     // Cargar nombre del grupo del usuario
     useEffect(() => {
         const loadUserGroupName = async () => {
-            if (!user) return;
+            if (!user || authLoading) return;
             
             try {
                 const groupsData = await groupsApi.getAll();
@@ -40,8 +40,10 @@ export default function SettingsPage() {
             }
         };
 
-        loadUserGroupName();
-    }, [user]);
+        if (user && !authLoading) {
+            loadUserGroupName();
+        }
+    }, [user, authLoading]);
 
     const toggleLanguage = () => {
         const newLanguage = language === 'en' ? 'es' : 'en';

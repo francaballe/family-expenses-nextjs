@@ -5,6 +5,9 @@ interface FetchOptions extends RequestInit {
     skipAuth?: boolean;
 }
 
+// Global flag to prevent multiple logout attempts
+let isLoggingOut = false;
+
 export async function apiFetch<T>(
     endpoint: string,
     options: FetchOptions = {}
@@ -30,6 +33,21 @@ export async function apiFetch<T>(
     });
 
     if (!response.ok) {
+        // Handle authorization errors
+        if (response.status === 401 && !isLoggingOut) {
+            isLoggingOut = true;
+            
+            // Clear token and trigger logout through event
+            if (typeof window !== 'undefined') {
+                localStorage.removeItem('family_expenses_token');
+                
+                // Dispatch custom event to notify auth context
+                window.dispatchEvent(new CustomEvent('auth:token-expired'));
+            }
+            
+            throw new Error('Session expired. Please login again.');
+        }
+        
         const error = await response.json().catch(() => ({ error: 'Request failed' }));
         throw new Error(error.error || `HTTP error! status: ${response.status}`);
     }
@@ -86,6 +104,11 @@ export const usersApi = {
         apiFetch<User>('/api/users', {
             method: 'PATCH',
             body: JSON.stringify({ email, currentPassword, newPassword }),
+        }),
+    resetPassword: (email: string, newPassword: string) =>
+        apiFetch<{ message: string }>('/api/users/reset-password', {
+            method: 'POST',
+            body: JSON.stringify({ email, newPassword }),
         }),
 };
 

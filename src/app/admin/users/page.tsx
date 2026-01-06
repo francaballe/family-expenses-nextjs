@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth-context';
+import { useLanguage } from '@/contexts/language-context';
 import MainLayout from '@/components/MainLayout';
 import { usersApi, groupsApi, rolesApi, User, Group, Role, CreateUserRequest } from '@/lib/api';
 
@@ -12,27 +13,43 @@ interface UserFormData {
     password: string;
     userroleid: number;
     groupid: number;
+    isblocked?: boolean;
 }
 
-const emptyForm: UserFormData = {
+interface GroupFormData {
+    name: string;
+}
+
+const emptyUserForm: UserFormData = {
     firstname: '',
     lastname: '',
     email: '',
     password: '',
     userroleid: 1,
     groupid: 1,
+    isblocked: false,
+};
+
+const emptyGroupForm: GroupFormData = {
+    name: '',
 };
 
 export default function UsersAdminPage() {
     const { user: currentUser, isLoading: authLoading } = useAuth();
+    const { t } = useLanguage();
     const [users, setUsers] = useState<User[]>([]);
     const [groups, setGroups] = useState<Group[]>([]);
     const [roles, setRoles] = useState<Role[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [showModal, setShowModal] = useState(false);
+    const [showUserModal, setShowUserModal] = useState(false);
+    const [showGroupModal, setShowGroupModal] = useState(false);
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
-    const [formData, setFormData] = useState<UserFormData>(emptyForm);
+    const [selectedUserForPassword, setSelectedUserForPassword] = useState<User | null>(null);
+    const [userFormData, setUserFormData] = useState<UserFormData>(emptyUserForm);
+    const [groupFormData, setGroupFormData] = useState<GroupFormData>(emptyGroupForm);
+    const [newPassword, setNewPassword] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
@@ -61,6 +78,18 @@ export default function UsersAdminPage() {
         }
     };
 
+    // Generate random password
+    const generateRandomPassword = () => {
+        const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        const stringLength = 16;
+        let randomString = "";
+        for (let i = 0; i < stringLength; i++) {
+            const rnum = Math.floor(Math.random() * chars.length);
+            randomString += chars.substring(rnum, rnum + 1);
+        }
+        return randomString;
+    };
+
     // Check if admin
     if (authLoading) {
         return (
@@ -70,37 +99,49 @@ export default function UsersAdminPage() {
         );
     }
 
-    if (!currentUser || currentUser.userRoleId !== 0) {
+    if (!currentUser || currentUser.userRoleId !== 1) {
         return (
             <MainLayout>
                 <div className="max-w-lg mx-auto text-center py-12">
-                    <h1 className="text-2xl font-bold text-red-500 mb-4">⛔ Access Denied</h1>
+                    <h1 className="text-2xl font-bold text-red-500 mb-4">⛔ {t('error')}</h1>
                     <p className="text-gray-600">You don&apos;t have permission to access this page.</p>
                 </div>
             </MainLayout>
         );
     }
 
-    const openCreateModal = () => {
+    const openCreateUserModal = () => {
         setEditingUser(null);
-        setFormData(emptyForm);
-        setShowModal(true);
+        setUserFormData(emptyUserForm);
+        setShowUserModal(true);
     };
 
-    const openEditModal = (user: User) => {
+    const openEditUserModal = (user: User) => {
         setEditingUser(user);
-        setFormData({
+        setUserFormData({
             firstname: user.firstname,
             lastname: user.lastname,
             email: user.email,
             password: '', // Don't prefill password
             userroleid: typeof user.userroleid === 'object' ? user.userroleid._id : user.userroleid,
             groupid: typeof user.groupid === 'object' ? user.groupid._id : user.groupid,
+            isblocked: user.isblocked,
         });
-        setShowModal(true);
+        setShowUserModal(true);
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const openCreateGroupModal = () => {
+        setGroupFormData(emptyGroupForm);
+        setShowGroupModal(true);
+    };
+
+    const openPasswordModal = (user: User) => {
+        setSelectedUserForPassword(user);
+        setNewPassword('');
+        setShowPasswordModal(true);
+    };
+
+    const handleUserSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
         setIsSubmitting(true);
@@ -110,27 +151,66 @@ export default function UsersAdminPage() {
                 // Update user
                 await usersApi.update({
                     _id: editingUser._id,
-                    firstname: formData.firstname,
-                    lastname: formData.lastname,
-                    email: formData.email,
-                    userroleid: formData.userroleid,
-                    groupid: formData.groupid,
+                    firstname: userFormData.firstname,
+                    lastname: userFormData.lastname,
+                    email: userFormData.email,
+                    userroleid: userFormData.userroleid,
+                    groupid: userFormData.groupid,
+                    isblocked: userFormData.isblocked,
                 });
             } else {
                 // Create user
                 await usersApi.create({
-                    firstname: formData.firstname,
-                    lastname: formData.lastname,
-                    email: formData.email,
-                    password: formData.password,
-                    userroleid: formData.userroleid,
-                    groupid: formData.groupid,
+                    firstname: userFormData.firstname,
+                    lastname: userFormData.lastname,
+                    email: userFormData.email,
+                    password: userFormData.password,
+                    userroleid: userFormData.userroleid,
+                    groupid: userFormData.groupid,
                 });
             }
-            setShowModal(false);
+            setShowUserModal(false);
             fetchData();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to save user');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleGroupSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError(null);
+        setIsSubmitting(true);
+
+        try {
+            await groupsApi.create(groupFormData.name);
+            setShowGroupModal(false);
+            fetchData();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to create group');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handlePasswordReset = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedUserForPassword || newPassword.length < 8) {
+            setError('Password must be at least 8 characters long');
+            return;
+        }
+
+        setError(null);
+        setIsSubmitting(true);
+
+        try {
+            await usersApi.resetPassword(selectedUserForPassword.email, newPassword);
+            setShowPasswordModal(false);
+            setSelectedUserForPassword(null);
+            setNewPassword('');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to reset password');
         } finally {
             setIsSubmitting(false);
         }
@@ -162,17 +242,40 @@ export default function UsersAdminPage() {
 
     return (
         <MainLayout>
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-6xl mx-auto">
                 <div className="flex items-center justify-between mb-6">
                     <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
-                        👥 Users Admin
+                        👥 {t('settingsMenuUserBtn')}
                     </h1>
-                    <button
-                        onClick={openCreateModal}
-                        className="btn btn-primary"
-                    >
-                        + New User
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={fetchData}
+                            className="btn btn-outline"
+                            disabled={isLoading}
+                        >
+                            <span className="mr-2">🔄</span>
+                            {t('btnRefresh')}
+                        </button>
+                        <button
+                            onClick={openCreateUserModal}
+                            className="btn btn-primary"
+                        >
+                            <span className="mr-2">👤</span>
+                            {t('btnNewUser')}
+                        </button>
+                        <button
+                            onClick={openCreateGroupModal}
+                            className="btn btn-primary"
+                        >
+                            <span className="mr-2">👥</span>
+                            {t('btnNewGroup')}
+                        </button>
+                    </div>
+                </div>
+
+                <div className="mb-4 text-sm text-gray-600 dark:text-gray-400 flex items-center">
+                    <span className="mr-2">💡</span>
+                    {t('lbClickEditUser')}
                 </div>
 
                 {error && (
@@ -191,19 +294,27 @@ export default function UsersAdminPage() {
                             <table className="w-full">
                                 <thead className="bg-gray-50 dark:bg-gray-700">
                                     <tr>
-                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Name</th>
-                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Email</th>
-                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Role</th>
-                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Group</th>
-                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Status</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">{t('gridFirstName')}</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">{t('gridLastName')}</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">{t('gridEmail')}</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">{t('gridRole')}</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">{t('gridGroup')}</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">{t('gridBlocked')}</th>
                                         <th className="px-4 py-3 text-right text-sm font-medium text-gray-600 dark:text-gray-300">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                                     {users.map((user) => (
-                                        <tr key={user._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                        <tr 
+                                            key={user._id} 
+                                            className="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer"
+                                            onDoubleClick={() => openEditUserModal(user)}
+                                        >
                                             <td className="px-4 py-3 text-gray-800 dark:text-white">
-                                                {user.firstname} {user.lastname}
+                                                {user.firstname}
+                                            </td>
+                                            <td className="px-4 py-3 text-gray-800 dark:text-white">
+                                                {user.lastname}
                                             </td>
                                             <td className="px-4 py-3 text-gray-600 dark:text-gray-400 text-sm">
                                                 {user.email}
@@ -223,60 +334,77 @@ export default function UsersAdminPage() {
                                                 </span>
                                             </td>
                                             <td className="px-4 py-3 text-right">
-                                                <button
-                                                    onClick={() => openEditModal(user)}
-                                                    className="text-blue-500 hover:text-blue-700 text-sm mr-2"
-                                                >
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    onClick={() => toggleBlockUser(user)}
-                                                    className={`text-sm ${user.isblocked
-                                                            ? 'text-green-500 hover:text-green-700'
-                                                            : 'text-red-500 hover:text-red-700'
-                                                        }`}
-                                                >
-                                                    {user.isblocked ? 'Unblock' : 'Block'}
-                                                </button>
+                                                <div className="flex justify-end gap-2">
+                                                    <button
+                                                        onClick={() => openEditUserModal(user)}
+                                                        className="text-blue-500 hover:text-blue-700 text-sm"
+                                                        title={t('btnEditUser')}
+                                                    >
+                                                        ✏️
+                                                    </button>
+                                                    <button
+                                                        onClick={() => openPasswordModal(user)}
+                                                        className="text-orange-500 hover:text-orange-700 text-sm"
+                                                        title="Reset Password"
+                                                    >
+                                                        🔑
+                                                    </button>
+                                                    <button
+                                                        onClick={() => toggleBlockUser(user)}
+                                                        className={`text-sm ${user.isblocked
+                                                                ? 'text-green-500 hover:text-green-700'
+                                                                : 'text-red-500 hover:text-red-700'
+                                                            }`}
+                                                        title={user.isblocked ? 'Unblock' : 'Block'}
+                                                    >
+                                                        {user.isblocked ? '✅' : '🚫'}
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
+                        
+                        {users.length > 0 && (
+                            <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                                Total: {users.length} users
+                            </div>
+                        )}
                     </div>
                 )}
 
                 {/* User Modal */}
-                {showModal && (
+                {showUserModal && (
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
                             <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
-                                {editingUser ? 'Edit User' : 'Create New User'}
+                                {editingUser ? t('btnEditUser') : t('btnNewUser')}
                             </h3>
 
-                            <form onSubmit={handleSubmit} className="space-y-4">
+                            <form onSubmit={handleUserSubmit} className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                                            First Name
+                                            {t('gridFirstName')}
                                         </label>
                                         <input
                                             type="text"
-                                            value={formData.firstname}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, firstname: e.target.value }))}
+                                            value={userFormData.firstname}
+                                            onChange={(e) => setUserFormData(prev => ({ ...prev, firstname: e.target.value }))}
                                             className="input"
                                             required
                                         />
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                                            Last Name
+                                            {t('gridLastName')}
                                         </label>
                                         <input
                                             type="text"
-                                            value={formData.lastname}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, lastname: e.target.value }))}
+                                            value={userFormData.lastname}
+                                            onChange={(e) => setUserFormData(prev => ({ ...prev, lastname: e.target.value }))}
                                             className="input"
                                             required
                                         />
@@ -285,12 +413,12 @@ export default function UsersAdminPage() {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                                        Email
+                                        {t('gridEmail')}
                                     </label>
                                     <input
                                         type="email"
-                                        value={formData.email}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                                        value={userFormData.email}
+                                        onChange={(e) => setUserFormData(prev => ({ ...prev, email: e.target.value }))}
                                         className="input"
                                         required
                                     />
@@ -301,24 +429,38 @@ export default function UsersAdminPage() {
                                         <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
                                             Password
                                         </label>
-                                        <input
-                                            type="password"
-                                            value={formData.password}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                                            className="input"
-                                            required={!editingUser}
-                                        />
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="password"
+                                                value={userFormData.password}
+                                                onChange={(e) => setUserFormData(prev => ({ ...prev, password: e.target.value }))}
+                                                className="input flex-1"
+                                                required={!editingUser}
+                                                minLength={8}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const randomPw = generateRandomPassword();
+                                                    setUserFormData(prev => ({ ...prev, password: randomPw }));
+                                                }}
+                                                className="btn btn-outline text-sm px-3"
+                                                title="Generate Random Password"
+                                            >
+                                                🎲
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                                            Role
+                                            {t('gridRole')}
                                         </label>
                                         <select
-                                            value={formData.userroleid}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, userroleid: parseInt(e.target.value) }))}
+                                            value={userFormData.userroleid}
+                                            onChange={(e) => setUserFormData(prev => ({ ...prev, userroleid: parseInt(e.target.value) }))}
                                             className="input"
                                         >
                                             {roles.map(role => (
@@ -328,11 +470,11 @@ export default function UsersAdminPage() {
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                                            Group
+                                            {t('gridGroup')}
                                         </label>
                                         <select
-                                            value={formData.groupid}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, groupid: parseInt(e.target.value) }))}
+                                            value={userFormData.groupid}
+                                            onChange={(e) => setUserFormData(prev => ({ ...prev, groupid: parseInt(e.target.value) }))}
                                             className="input"
                                         >
                                             {groups.map(group => (
@@ -342,21 +484,143 @@ export default function UsersAdminPage() {
                                     </div>
                                 </div>
 
+                                {editingUser && (
+                                    <div className="flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            id="isblocked"
+                                            checked={userFormData.isblocked || false}
+                                            onChange={(e) => setUserFormData(prev => ({ ...prev, isblocked: e.target.checked }))}
+                                            className="mr-2"
+                                        />
+                                        <label htmlFor="isblocked" className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                            {t('gridBlocked')}
+                                        </label>
+                                    </div>
+                                )}
+
                                 <div className="flex gap-4 pt-4">
                                     <button
                                         type="button"
-                                        onClick={() => setShowModal(false)}
+                                        onClick={() => setShowUserModal(false)}
                                         className="btn btn-outline flex-1"
                                         disabled={isSubmitting}
                                     >
-                                        Cancel
+                                        {t('cancel')}
                                     </button>
                                     <button
                                         type="submit"
                                         className="btn btn-primary flex-1"
                                         disabled={isSubmitting}
                                     >
-                                        {isSubmitting ? 'Saving...' : 'Save'}
+                                        {isSubmitting ? t('saving') : t('save')}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
+                {/* Group Modal */}
+                {showGroupModal && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 max-w-md w-full">
+                            <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                                {t('btnNewGroup')}
+                            </h3>
+
+                            <form onSubmit={handleGroupSubmit} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                        Group Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={groupFormData.name}
+                                        onChange={(e) => setGroupFormData(prev => ({ ...prev, name: e.target.value }))}
+                                        className="input"
+                                        required
+                                    />
+                                </div>
+
+                                <div className="flex gap-4 pt-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowGroupModal(false)}
+                                        className="btn btn-outline flex-1"
+                                        disabled={isSubmitting}
+                                    >
+                                        {t('cancel')}
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="btn btn-primary flex-1"
+                                        disabled={isSubmitting}
+                                    >
+                                        {isSubmitting ? t('saving') : t('save')}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
+                {/* Password Reset Modal */}
+                {showPasswordModal && selectedUserForPassword && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 max-w-md w-full">
+                            <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                                🔑 Reset Password
+                            </h3>
+                            <p className="text-gray-600 dark:text-gray-400 mb-4">
+                                Resetting password for: <strong>{selectedUserForPassword.firstname} {selectedUserForPassword.lastname}</strong>
+                            </p>
+
+                            <form onSubmit={handlePasswordReset} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                        New Password
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="password"
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            className="input flex-1"
+                                            required
+                                            minLength={8}
+                                            placeholder="At least 8 characters"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setNewPassword(generateRandomPassword())}
+                                            className="btn btn-outline text-sm px-3"
+                                            title="Generate Random Password"
+                                        >
+                                            🎲
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-4 pt-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShowPasswordModal(false);
+                                            setSelectedUserForPassword(null);
+                                            setNewPassword('');
+                                        }}
+                                        className="btn btn-outline flex-1"
+                                        disabled={isSubmitting}
+                                    >
+                                        {t('cancel')}
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="btn btn-primary flex-1"
+                                        disabled={isSubmitting || newPassword.length < 8}
+                                    >
+                                        {isSubmitting ? 'Resetting...' : 'Reset Password'}
                                     </button>
                                 </div>
                             </form>

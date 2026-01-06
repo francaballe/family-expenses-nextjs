@@ -21,6 +21,12 @@ function decodeToken(token: string): UserTokenInfo | null {
     try {
         const payload = token.split('.')[1];
         const decoded = JSON.parse(atob(payload));
+        
+        // Check if token is expired
+        if (decoded.exp && decoded.exp * 1000 < Date.now()) {
+            return null;
+        }
+        
         return decoded as UserTokenInfo;
     } catch {
         return null;
@@ -48,6 +54,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         setIsLoading(false);
     }, []);
+
+    // Listen for token expiration events from API calls
+    useEffect(() => {
+        const handleTokenExpired = () => {
+            setToken(null);
+            setUser(null);
+            router.push('/login');
+        };
+
+        window.addEventListener('auth:token-expired', handleTokenExpired);
+        return () => window.removeEventListener('auth:token-expired', handleTokenExpired);
+    }, [router]);
 
     // Redirect based on auth state
     useEffect(() => {

@@ -46,21 +46,23 @@ export default function MainLayout({ children }: MainLayoutProps) {
             path: '/expenses',
             icon: '📊'
         },
-        {
-            name: t('settingsTitle'),
-            path: '/settings',
-            icon: '⚙️'
-        },
     ];
 
-    // Admin-only items
-    if (user?.userRoleId === 0) {
+    // Admin-only items (insert before settings)
+    if (user?.userRoleId === 1) {
         navItems.push({
-            name: t('settingsMenuUserBtn'),
+            name: 'Usuarios',
             path: '/admin/users',
             icon: '👥'
         });
     }
+
+    // Settings always at the end
+    navItems.push({
+        name: t('settingsTitle'),
+        path: '/settings',
+        icon: '⚙️'
+    });
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
