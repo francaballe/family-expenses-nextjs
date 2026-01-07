@@ -243,32 +243,35 @@ export default function UsersAdminPage() {
     return (
         <MainLayout>
             <div className="max-w-6xl mx-auto">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
                     <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
                         👥 {t('settingsMenuUserBtn')}
                     </h1>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                         <button
                             onClick={fetchData}
-                            className="btn btn-outline"
+                            className="btn btn-outline text-sm px-3 py-2 flex-1 sm:flex-initial"
                             disabled={isLoading}
                         >
                             <span className="mr-2">🔄</span>
-                            {t('btnRefresh')}
+                            <span className="hidden sm:inline">{t('btnRefresh')}</span>
+                            <span className="sm:hidden">Refresh</span>
                         </button>
                         <button
                             onClick={openCreateUserModal}
-                            className="btn btn-primary"
+                            className="btn btn-primary text-sm px-3 py-2 flex-1 sm:flex-initial"
                         >
                             <span className="mr-2">👤</span>
-                            {t('btnNewUser')}
+                            <span className="hidden sm:inline">{t('btnNewUser')}</span>
+                            <span className="sm:hidden">User</span>
                         </button>
                         <button
                             onClick={openCreateGroupModal}
-                            className="btn btn-primary"
+                            className="btn btn-primary text-sm px-3 py-2 flex-1 sm:flex-initial"
                         >
                             <span className="mr-2">👥</span>
-                            {t('btnNewGroup')}
+                            <span className="hidden sm:inline">{t('btnNewGroup')}</span>
+                            <span className="sm:hidden">Group</span>
                         </button>
                     </div>
                 </div>
