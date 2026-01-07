@@ -254,24 +254,21 @@ export default function UsersAdminPage() {
                             disabled={isLoading}
                         >
                             <span className="mr-2">🔄</span>
-                            <span className="hidden sm:inline">{t('btnRefresh')}</span>
-                            <span className="sm:hidden">Refresh</span>
+                            {t('btnRefresh')}
                         </button>
                         <button
                             onClick={openCreateUserModal}
                             className="btn btn-primary text-sm px-3 py-2 flex-1 sm:flex-initial"
                         >
                             <span className="mr-2">👤</span>
-                            <span className="hidden sm:inline">{t('btnNewUser')}</span>
-                            <span className="sm:hidden">User</span>
+                            {t('btnNewUser')}
                         </button>
                         <button
                             onClick={openCreateGroupModal}
                             className="btn btn-primary text-sm px-3 py-2 flex-1 sm:flex-initial"
                         >
                             <span className="mr-2">👥</span>
-                            <span className="hidden sm:inline">{t('btnNewGroup')}</span>
-                            <span className="sm:hidden">Group</span>
+                            {t('btnNewGroup')}
                         </button>
                     </div>
                 </div>

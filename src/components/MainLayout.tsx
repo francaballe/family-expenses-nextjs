@@ -135,7 +135,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                 <div className="absolute bottom-20 left-0 right-0 px-4 py-3 border-t border-gray-200 dark:border-gray-700">
                     <div className="text-center text-sm text-gray-500 dark:text-gray-400">
                         <span className="font-medium">{t('lbVersion')}: </span>
-                        <span>3.1.1</span>
+                        <span>3.1.2</span>
                     </div>
                 </div>
 
