@@ -15,6 +15,12 @@ const expenseSchema = new mongoose.Schema({
     { versionKey: false, timestamps: true }
 );
 
-const Expense = mongoose.models.Expense || mongoose.model("Expense", expenseSchema);
+// Limpiar el modelo existente si existe
+if (mongoose.models.Expense) {
+    delete mongoose.models.Expense;
+}
+
+// Registrar el modelo
+const Expense = mongoose.model("Expense", expenseSchema);
 
 export default Expense;

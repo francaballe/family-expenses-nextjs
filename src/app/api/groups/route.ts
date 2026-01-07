@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
-import Group from '@/models/Group';
 import { verifyToken, unauthorizedResponse } from '@/lib/auth';
+
+// Función para asegurar que los modelos estén registrados
+async function ensureModelsRegistered() {
+    const Group = (await import('@/models/Group')).default;
+    return { Group };
+}
 
 export async function GET(req: NextRequest) {
     const user = verifyToken(req);
@@ -9,6 +14,8 @@ export async function GET(req: NextRequest) {
 
     try {
         await dbConnect();
+        const { Group } = await ensureModelsRegistered();
+        
         const resp = await Group.find({});
         return NextResponse.json(resp);
     } catch (error: any) {
@@ -23,6 +30,8 @@ export async function POST(req: NextRequest) {
 
     try {
         await dbConnect();
+        const { Group } = await ensureModelsRegistered();
+        
         const { name } = await req.json();
 
         const maxIdGroup = await Group.findOne().sort({ _id: -1 });

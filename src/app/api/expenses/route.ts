@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
-import Expense from '@/models/Expense';
-import User from '@/models/User';
 import { verifyToken, unauthorizedResponse } from '@/lib/auth';
 import mongoose from 'mongoose';
+
+// Función para asegurar que los modelos estén registrados
+async function ensureModelsRegistered() {
+    const Expense = (await import('@/models/Expense')).default;
+    const User = (await import('@/models/User')).default;
+    
+    return { Expense, User };
+}
 
 export async function GET(req: NextRequest) {
     const user = verifyToken(req);
@@ -11,6 +17,8 @@ export async function GET(req: NextRequest) {
 
     try {
         await dbConnect();
+        const { Expense, User } = await ensureModelsRegistered();
+        
         const { searchParams } = new URL(req.url);
         const year = searchParams.get('year') ? parseInt(searchParams.get('year')!) : null;
         const month = searchParams.get('month') ? parseInt(searchParams.get('month')!) : null;
@@ -32,7 +40,7 @@ export async function GET(req: NextRequest) {
         if (groupid) {
             const usersInGroup = await User.find({ groupid }).select('_id');
             if (usersInGroup.length > 0) {
-                const userIds = usersInGroup.map(u => new mongoose.Types.ObjectId(u._id as string));
+                const userIds = usersInGroup.map(u => u._id);
                 searchCriteria['userid'] = { $in: userIds };
             }
         }
@@ -51,6 +59,8 @@ export async function POST(req: NextRequest) {
 
     try {
         await dbConnect();
+        const { Expense } = await ensureModelsRegistered();
+        
         const data = await req.json();
 
         if (Array.isArray(data) && data.length) {

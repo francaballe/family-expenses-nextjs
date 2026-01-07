@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
-import ClosedMonth from '@/models/ClosedMonth';
 import { verifyToken, unauthorizedResponse } from '@/lib/auth';
 import sendEmail from '@/lib/sendEmail';
+
+// Función para asegurar que los modelos estén registrados
+async function ensureModelsRegistered() {
+    const ClosedMonth = (await import('@/models/ClosedMonth')).default;
+    return { ClosedMonth };
+}
 
 export async function GET(req: NextRequest) {
     const user = verifyToken(req);
@@ -10,6 +15,8 @@ export async function GET(req: NextRequest) {
 
     try {
         await dbConnect();
+        const { ClosedMonth } = await ensureModelsRegistered();
+        
         const { searchParams } = new URL(req.url);
         const year = searchParams.get('year');
         const month = searchParams.get('month');
@@ -49,6 +56,8 @@ export async function POST(req: NextRequest) {
 
     try {
         await dbConnect();
+        const { ClosedMonth } = await ensureModelsRegistered();
+        
         const data = await req.json();
         
         // Create the closed month

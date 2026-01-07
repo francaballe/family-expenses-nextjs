@@ -7,6 +7,12 @@ const closedMonthSchema = new mongoose.Schema({
     { versionKey: false, timestamps: true }
 );
 
-const ClosedMonth = mongoose.models.ClosedMonth || mongoose.model("ClosedMonth", closedMonthSchema);
+// Limpiar el modelo existente si existe
+if (mongoose.models.ClosedMonth) {
+    delete mongoose.models.ClosedMonth;
+}
+
+// Registrar el modelo
+const ClosedMonth = mongoose.model("ClosedMonth", closedMonthSchema);
 
 export default ClosedMonth;
