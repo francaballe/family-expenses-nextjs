@@ -129,7 +129,7 @@ export default function LoginPage() {
 
             {/* Version */}
             <div className="mt-8 text-gray-500 text-sm">
-                Version: 3.1.0
+                Version: 3.1.1
             </div>
         </div>
     );
