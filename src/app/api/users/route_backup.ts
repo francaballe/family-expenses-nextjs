@@ -16,6 +16,9 @@ export async function GET(req: NextRequest) {
     try {
         await dbConnect();
         
+        // Asegurarse de que los modelos estén registrados
+        Group;
+        Role;
         const { searchParams } = new URL(req.url);
         const groupid = searchParams.get('groupid') ? parseInt(searchParams.get('groupid')!) : null;
 
@@ -24,8 +27,8 @@ export async function GET(req: NextRequest) {
 
         const resp = await User.find(findOption)
             .select('-password')
-            .populate({ path: 'userroleid', model: 'Role' })
-            .populate({ path: 'groupid', model: 'Group' });
+            .populate('userroleid')
+            .populate('groupid');
 
         return NextResponse.json(resp);
     } catch (error: any) {
@@ -40,6 +43,10 @@ export async function POST(req: NextRequest) {
 
     try {
         await dbConnect();
+        
+        // Asegurarse de que los modelos estén registrados
+        Group;
+        Role;
         
         const data = await req.json();
         const { firstname, lastname, email, password, userroleid, groupid } = data;
@@ -72,6 +79,10 @@ export async function PUT(req: NextRequest) {
     try {
         await dbConnect();
         
+        // Asegurarse de que los modelos estén registrados
+        Group;
+        Role;
+        
         const data = await req.json();
         const { _id, firstname, lastname, email, userroleid, isblocked, groupid } = data;
 
@@ -98,6 +109,10 @@ export async function PATCH(req: NextRequest) {
     try {
         await dbConnect();
         
+        // Asegurarse de que los modelos estén registrados
+        Group;
+        Role;
+        
         const { email, currentPassword, newPassword } = await req.json();
 
         const userInfo = await User.findOne({ email: new RegExp(email, 'i') });
@@ -113,30 +128,9 @@ export async function PATCH(req: NextRequest) {
         const newPassHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
         const updatedUser = await User.findOneAndUpdate({ email: new RegExp(email, 'i') }, { password: newPassHash });
 
-        return NextResponse.json({ message: 'Password updated successfully' });
+        return NextResponse.json(updatedUser);
     } catch (error: any) {
-        console.error('Error updating password:', error);
-        return NextResponse.json({ error: 'Error when trying to update password', details: error.message }, { status: 400 });
-    }
-}
-
-export async function DELETE(req: NextRequest) {
-    const user = verifyToken(req);
-    if (!user) return unauthorizedResponse();
-
-    try {
-        await dbConnect();
-        const { searchParams } = new URL(req.url);
-        const userId = searchParams.get('id');
-
-        if (!userId) {
-            return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
-        }
-
-        await User.findByIdAndDelete(userId);
-        return NextResponse.json({ message: 'User deleted successfully' });
-    } catch (error: any) {
-        console.error('Error deleting user:', error);
-        return NextResponse.json({ error: 'Error when trying to delete user', details: error.message }, { status: 400 });
+        console.error('Error changing password:', error);
+        return NextResponse.json({ error: 'Error when trying to change password', details: error.message }, { status: 400 });
     }
 }
