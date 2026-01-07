@@ -11,7 +11,12 @@ const roleSchema = new mongoose.Schema({
     }
 );
 
-// Asegurar que el modelo se registre una sola vez
-const Role = mongoose.models.Role || mongoose.model("Role", roleSchema);
+// Limpiar el modelo existente si existe
+if (mongoose.models.Role) {
+    delete mongoose.models.Role;
+}
+
+// Registrar el modelo
+const Role = mongoose.model("Role", roleSchema);
 
 export default Role;

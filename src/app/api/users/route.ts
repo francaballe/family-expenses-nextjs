@@ -1,13 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
-import User from '@/models/User';
-import Group from '@/models/Group';
-import Role from '@/models/Role';
 import { verifyToken, unauthorizedResponse } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
 import moment from 'moment-timezone';
+import mongoose from 'mongoose';
 
 const SALT_ROUNDS = process.env.SALT_ROUNDS ? parseInt(process.env.SALT_ROUNDS) : 10;
+
+// Función para asegurar que los modelos estén registrados
+async function ensureModelsRegistered() {
+    // Importar dinámicamente los modelos para evitar problemas de registro
+    const User = (await import('@/models/User')).default;
+    const Group = (await import('@/models/Group')).default;
+    const Role = (await import('@/models/Role')).default;
+    
+    return { User, Group, Role };
+}
 
 export async function GET(req: NextRequest) {
     const user = verifyToken(req);
@@ -15,6 +23,7 @@ export async function GET(req: NextRequest) {
 
     try {
         await dbConnect();
+        const { User, Group, Role } = await ensureModelsRegistered();
         
         const { searchParams } = new URL(req.url);
         const groupid = searchParams.get('groupid') ? parseInt(searchParams.get('groupid')!) : null;
@@ -24,8 +33,8 @@ export async function GET(req: NextRequest) {
 
         const resp = await User.find(findOption)
             .select('-password')
-            .populate({ path: 'userroleid', model: 'Role' })
-            .populate({ path: 'groupid', model: 'Group' });
+            .populate('userroleid')
+            .populate('groupid');
 
         return NextResponse.json(resp);
     } catch (error: any) {
@@ -40,6 +49,7 @@ export async function POST(req: NextRequest) {
 
     try {
         await dbConnect();
+        const { User } = await ensureModelsRegistered();
         
         const data = await req.json();
         const { firstname, lastname, email, password, userroleid, groupid } = data;
@@ -71,6 +81,7 @@ export async function PUT(req: NextRequest) {
 
     try {
         await dbConnect();
+        const { User } = await ensureModelsRegistered();
         
         const data = await req.json();
         const { _id, firstname, lastname, email, userroleid, isblocked, groupid } = data;
@@ -97,6 +108,7 @@ export async function PATCH(req: NextRequest) {
 
     try {
         await dbConnect();
+        const { User } = await ensureModelsRegistered();
         
         const { email, currentPassword, newPassword } = await req.json();
 
@@ -126,6 +138,8 @@ export async function DELETE(req: NextRequest) {
 
     try {
         await dbConnect();
+        const { User } = await ensureModelsRegistered();
+        
         const { searchParams } = new URL(req.url);
         const userId = searchParams.get('id');
 

@@ -14,6 +14,12 @@ const userSchema = new mongoose.Schema({
     { versionKey: false, timestamps: true }
 );
 
-const User = mongoose.models.User || mongoose.model("User", userSchema);
+// Limpiar el modelo existente si existe
+if (mongoose.models.User) {
+    delete mongoose.models.User;
+}
+
+// Registrar el modelo
+const User = mongoose.model("User", userSchema);
 
 export default User;

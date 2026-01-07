@@ -11,7 +11,12 @@ const groupSchema = new mongoose.Schema({
     }
 );
 
-// Asegurar que el modelo se registre una sola vez
-const Group = mongoose.models.Group || mongoose.model("Group", groupSchema);
+// Limpiar el modelo existente si existe
+if (mongoose.models.Group) {
+    delete mongoose.models.Group;
+}
+
+// Registrar el modelo
+const Group = mongoose.model("Group", groupSchema);
 
 export default Group;
